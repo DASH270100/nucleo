@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07080d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Núcleo">
+<title>Núcleo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07080d; --card:rgba(255,255,255,.045); --line:rgba(255,255,255,.09);
+  --txt:#EEF2FF; --mut:#8A93B2; --cyan:#4DF0FF; --vio:#9B6BFF; --blue:#3D7BFF;
+  --mint:#5CFFC8; --warn:#FFB86B; --red:#FF5C7A;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--txt)}
+body{font-family:'Manrope',system-ui,sans-serif;min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:var(--cyan);word-break:break-all}
+button{font:inherit;color:inherit}
+
+/* Fondo de manchas */
+.blobs{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.blobs i{position:absolute;width:62vmax;height:62vmax;border-radius:50%;filter:blur(80px);opacity:.33;animation:drift 24s ease-in-out infinite alternate}
+.blobs i:nth-child(1){background:radial-gradient(circle,var(--cyan),transparent 62%);top:-28vmax;left:-24vmax}
+.blobs i:nth-child(2){background:radial-gradient(circle,var(--vio),transparent 62%);top:8vmax;right:-34vmax;animation-delay:-8s}
+.blobs i:nth-child(3){background:radial-gradient(circle,var(--blue),transparent 62%);bottom:-38vmax;left:-6vmax;animation-delay:-16s}
+@keyframes drift{to{transform:translate(7vmax,5vmax) scale(1.12)}}
+
+.app{position:relative;z-index:1;max-width:640px;margin:0 auto;padding:calc(20px + env(safe-area-inset-top)) 16px calc(130px + env(safe-area-inset-bottom))}
+.glass{background:var(--card);border:1px solid var(--line);border-radius:22px;backdrop-filter:blur(22px) saturate(140%);-webkit-backdrop-filter:blur(22px) saturate(140%)}
+.fade{animation:fade .35s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* Tipografía */
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.kicker{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);font-weight:800}
+.title{font-family:'Unbounded',sans-serif;font-weight:700;font-size:31px;letter-spacing:-.02em;line-height:1.06;margin-top:8px}
+.grad{background:linear-gradient(100deg,var(--cyan),var(--vio));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sec{margin-top:24px}
+.sec-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.sec-h h2{font-family:'Unbounded',sans-serif;font-size:15px;font-weight:600}
+.link{color:var(--cyan);font-size:13px;font-weight:800;background:none;border:0;cursor:pointer}
+.ts{font-size:12.5px;color:var(--mut);font-weight:600}
+.icon-btn{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;background:var(--card);border:1px solid var(--line);cursor:pointer;color:var(--mut)}
+.icon-btn svg{width:18px;height:18px}
+
+/* Inputs y botones */
+.in{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:14px;padding:13px 14px;color:var(--txt);font:inherit;font-size:16px;outline:none;transition:.2s}
+.in::placeholder{color:#5d6584}
+.in:focus{border-color:rgba(77,240,255,.5);box-shadow:0 0 0 3px rgba(77,240,255,.12)}
+.in.bare{background:none;border:0;box-shadow:none;padding:12px 4px}
+.in.sm{padding:10px 12px;font-size:14px}
+select.in{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--mut) 50%),linear-gradient(135deg,var(--mut) 50%,transparent 50%);background-position:calc(100% - 16px) 50%,calc(100% - 11px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:30px}
+select.in option{background:#12141d}
+textarea.in{resize:none;min-height:130px;line-height:1.5}
+label.f{display:block;font-size:12px;font-weight:800;color:var(--mut);margin:14px 0 6px;letter-spacing:.04em}
+.btn{border:0;border-radius:14px;padding:13px 18px;font-weight:800;cursor:pointer;color:#06070b;background:linear-gradient(120deg,var(--cyan),var(--vio));transition:transform .15s,opacity .2s}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:rgba(255,255,255,.06);color:var(--txt);border:1px solid var(--line)}
+.btn.sm{padding:10px 14px;font-size:14px}
+.btn.full{width:100%;margin-top:18px}
+.btn:disabled{opacity:.5;pointer-events:none}
+
+/* Captura rápida */
+.quick{display:flex;align-items:center;gap:6px;padding:4px 6px 4px 14px;margin-top:22px}
+.send{width:44px;height:44px;flex:none;border:0;border-radius:14px;background:linear-gradient(135deg,var(--cyan),var(--vio));color:#06070b;display:grid;place-items:center;cursor:pointer}
+.send svg{width:20px;height:20px}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{padding:16px;text-align:left;cursor:pointer}
+.stat .n{font-family:'Unbounded',sans-serif;font-size:34px;font-weight:700;line-height:1}
+.stat .n .of{font-size:18px;color:var(--mut);font-weight:600}
+.stat .l{font-size:12px;color:var(--mut);margin-top:8px;font-weight:700}
+.stat.big{grid-column:span 2;display:flex;align-items:center;gap:18px;cursor:default}
+.foco{padding:18px}
+.foco ol{margin:10px 0 0 18px;display:grid;gap:8px;font-weight:600;line-height:1.4}
+.foco p{margin:8px 0 12px;color:var(--mut);font-size:14px}
+
+/* Tareas */
+.list{overflow:hidden}
+.task{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--line)}
+.task:last-child{border-bottom:0}
+.check{width:25px;height:25px;border-radius:8px;border:2px solid rgba(255,255,255,.25);flex:none;display:grid;place-items:center;cursor:pointer;background:none;transition:.2s}
+.check svg{width:14px;height:14px;opacity:0;color:#06070b}
+.check.on{background:var(--mint);border-color:var(--mint)}
+.check.on svg{opacity:1}
+.tb{flex:1;min-width:0}
+.tt{font-weight:700;font-size:15px;line-height:1.35}
+.task.done .tt{text-decoration:line-through;color:var(--mut)}
+.dot{width:8px;height:8px;border-radius:50%;flex:none}
+.x{background:none;border:0;color:#5d6584;cursor:pointer;padding:4px;display:grid}
+.x svg{width:16px;height:16px}
+.mini{font-size:12px;font-weight:800;color:var(--cyan);background:rgba(77,240,255,.1);border:0;border-radius:9px;padding:6px 9px;cursor:pointer;flex:none}
+.addtask{padding:6px 12px 12px}
+.addtask .row{display:flex;gap:8px}
+.addtask .row select{flex:1;min-width:0}
+.weeknav{display:flex;align-items:center;justify-content:space-between;text-align:center}
+.wk{font-family:'Unbounded',sans-serif;font-size:17px;font-weight:600;margin-top:4px}
+
+/* Barras de progreso */
+.bar{height:6px;border-radius:9px;background:rgba(255,255,255,.08);overflow:hidden}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--vio));border-radius:9px;transition:width .5s}
+
+/* Metas */
+.area-h{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);font-weight:800;margin:20px 0 8px}
+.meta{margin-bottom:10px;overflow:hidden}
+.meta summary{list-style:none;padding:16px;cursor:pointer}
+.meta summary::-webkit-details-marker{display:none}
+.meta .mt{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:12px}
+.meta .mt b{font-size:16px;line-height:1.3}
+.meta .pct{font-family:'Unbounded',sans-serif;font-size:14px;color:var(--cyan);flex:none}
+.meta.pausada{opacity:.55}
+.meta.lograda .pct{color:var(--mint)}
+.mbody{padding:0 16px 16px;border-top:1px solid var(--line)}
+.mbody .why{margin-top:14px;color:#c7cde3;font-size:14px;line-height:1.5}
+.range{display:flex;align-items:center;gap:12px;margin-top:14px}
+.range input{flex:1;accent-color:var(--cyan)}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.tag{display:inline-block;font-size:11px;font-weight:800;padding:4px 8px;border-radius:7px;background:rgba(255,255,255,.06);color:var(--mut);margin-right:6px}
+
+/* Notas */
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:8px 13px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--mut);font-size:13px;font-weight:800;cursor:pointer}
+.chip.on{color:#06070b;background:var(--cyan);border-color:transparent}
+.note{padding:15px;margin-bottom:10px}
+.nh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.badge{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border-radius:7px}
+.area{font-size:12px;font-weight:700;color:var(--mut)}
+.area.warn{color:var(--warn)}
+.when{margin-left:auto;font-size:12px;color:#5d6584;font-weight:600}
+.nc{margin-top:10px;line-height:1.55;font-size:15px;white-space:normal}
+.nt{display:flex;flex-wrap:wrap;gap:6px 10px;margin-top:10px;font-size:12.5px;color:var(--vio);font-weight:700}
+.nt .mlink{color:var(--cyan)}
+.na{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.na button{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:10px;padding:7px 10px;font-size:12.5px;font-weight:800;color:#c7cde3;cursor:pointer}
+.na button.del{color:var(--red);margin-left:auto}
+
+/* Revisión */
+.gen{padding:18px}
+.gen p{color:#c7cde3;font-size:14px;line-height:1.5;margin-bottom:14px}
+.gen .ts{margin-top:10px}
+.rev{padding:18px}
+.rev .res{font-size:16px;line-height:1.55;margin-top:10px;font-weight:600}
+.rev h3{font-size:13px;color:var(--mut);margin:18px 0 8px;font-weight:800}
+.rev ul{list-style:none;display:grid;gap:8px}
+.rev li{padding-left:16px;position:relative;line-height:1.45;font-size:14.5px}
+.rev li:before{content:"";position:absolute;left:0;top:.6em;width:6px;height:6px;border-radius:50%;background:var(--vio)}
+.rev ul.prio li:before{background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+.rev .q{margin-top:18px;padding:14px;border-radius:14px;background:rgba(155,107,255,.12);line-height:1.5;font-size:14.5px}
+.rev .q b{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--vio);margin-bottom:4px}
+.hist{margin-bottom:10px}
+.hist summary{padding:15px 16px;cursor:pointer;font-weight:800;list-style:none}
+.hist summary::-webkit-details-marker{display:none}
+.hist .rev{padding-top:0}
+
+.empty{padding:22px;text-align:center;color:var(--mut);font-size:14px;line-height:1.5}
+.seg{display:flex;padding:4px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid var(--line)}
+.seg button{flex:1;padding:10px;border-radius:10px;border:0;background:none;color:var(--mut);font-weight:800;cursor:pointer;transition:.2s}
+.seg button.on{background:rgba(255,255,255,.1);color:var(--txt)}
+
+/* Switch */
+.sw{display:flex;align-items:center;gap:10px;margin-top:16px;font-weight:700;font-size:14px;cursor:pointer}
+.sw input{display:none}
+.sw span{width:42px;height:24px;border-radius:99px;background:rgba(255,255,255,.12);position:relative;transition:.2s;flex:none}
+.sw span:after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}
+.sw input:checked+span{background:var(--cyan)}
+.sw input:checked+span:after{left:21px;background:#06070b}
+.sw small{color:var(--mut);font-weight:600}
+
+/* Nav */
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom));z-index:20;display:flex;align-items:center;gap:2px;padding:7px;border-radius:26px;width:min(430px,calc(100% - 24px));background:rgba(14,16,24,.7);border:1px solid var(--line);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
+.nav[hidden]{display:none}
+.nav button{flex:1;background:none;border:0;color:var(--mut);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:800;padding:6px 0;cursor:pointer;transition:color .2s}
+.nav button svg{width:22px;height:22px}
+.nav button.on{color:var(--txt)}
+.nav button.on svg{color:var(--cyan);filter:drop-shadow(0 0 6px rgba(77,240,255,.6))}
+.nav .fab{flex:none;width:56px;height:56px;border-radius:19px;background:linear-gradient(135deg,var(--cyan),var(--vio));color:#06070b;box-shadow:0 8px 30px rgba(77,240,255,.35);justify-content:center;margin:0 4px}
+.nav .fab svg{width:26px;height:26px}
+
+/* Sheet */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:30;opacity:0;pointer-events:none;transition:.25s}
+.ov.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:50%;bottom:0;transform:translate(-50%,105%);width:min(640px,100%);z-index:31;max-height:92dvh;overflow:auto;padding:10px 18px calc(22px + env(safe-area-inset-bottom));border-radius:26px 26px 0 0;background:rgba(16,18,28,.96);border:1px solid var(--line);transition:transform .34s cubic-bezier(.2,.9,.2,1)}
+.sheet.on{transform:translate(-50%,0)}
+.grab{width:40px;height:5px;border-radius:9px;background:rgba(255,255,255,.2);margin:0 auto 14px}
+.sheet .chips{margin-top:12px}
+.two{display:flex;gap:10px}
+.two>div{flex:1;min-width:0}
+
+/* Toast + loader */
+.toast{position:fixed;top:calc(14px + env(safe-area-inset-top));left:50%;transform:translate(-50%,-160%);z-index:50;padding:12px 18px;border-radius:16px;font-weight:700;font-size:14px;background:rgba(20,22,34,.92);border:1px solid var(--line);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);transition:transform .35s cubic-bezier(.2,.9,.2,1);max-width:calc(100% - 32px);text-align:center}
+.toast.on{transform:translate(-50%,0)}
+.toast.err{border-color:rgba(255,92,122,.5)}
+.loader{display:grid;place-items:center;min-height:60dvh}
+.spin{width:38px;height:38px;border-radius:50%;border:3px solid rgba(255,255,255,.1);border-top-color:var(--cyan);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Login */
+.login{min-height:80dvh;display:flex;flex-direction:column;justify-content:center;gap:10px}
+.logo{font-family:'Unbounded',sans-serif;font-size:46px;font-weight:800;letter-spacing:-.03em;background:linear-gradient(100deg,var(--cyan),var(--vio));-webkit-background-clip:text;background-clip:text;color:transparent}
+.loginf{padding:16px;margin-top:20px;display:grid;gap:10px}
+.err{color:var(--red);font-weight:700;font-size:14px}
+</style>
+</head>
+<body>
+<div class="blobs"><i></i><i></i><i></i></div>
+<svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4DF0FF"/><stop offset="1" stop-color="#9B6BFF"/></linearGradient></defs></svg>
+
+<main class="app" id="main"></main>
+
+<nav class="nav" id="nav" hidden>
+  <button data-v="inicio" onclick="ir('inicio')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Inicio</span></button>
+  <button data-v="cerebro" onclick="ir('cerebro')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 3A2.5 2.5 0 0 0 7 5.5v.3A3 3 0 0 0 4.5 9a3 3 0 0 0 .6 1.8A3 3 0 0 0 4 13.5a3 3 0 0 0 2 2.8V17a3 3 0 0 0 5.5 1.7V5A2 2 0 0 0 9.5 3Z"/><path d="M14.5 3A2.5 2.5 0 0 1 17 5.5v.3A3 3 0 0 1 19.5 9a3 3 0 0 1-.6 1.8 3 3 0 0 1 1.1 2.7 3 3 0 0 1-2 2.8V17a3 3 0 0 1-5.5 1.7"/></svg><span>Cerebro</span></button>
+  <button class="fab" onclick="abrirCaptura()" aria-label="Capturar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+  <button data-v="plan" onclick="ir('plan')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg><span>Plan</span></button>
+  <button data-v="revision" onclick="ir('revision')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg><span>Revisión</span></button>
+</nav>
+
+<div class="ov" id="ov" onclick="cerrarSheet()"></div>
+<div class="sheet" id="sheet"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== CONFIGURACIÓN ===== */
+const API_URL = 'https://script.google.com/macros/s/AKfycbyxT-lO_heu8Bvv_C_wTikk1Q6JYCfRIlszVIIvBiwAkdI4Xjnm21P9oV0tI2169JsC2w/exec';
+const NOMBRE  = 'Diego';
+
+/* ===== Constantes ===== */
+const TIPOS = { idea:['Idea','#FFD66B'], nota:['Nota','#8AB4FF'], link:['Link','#4DF0FF'], referencia:['Referencia','#C59BFF'], aprendizaje:['Aprendizaje','#5CFFC8'] };
+const PRIO  = { alta:'#FF5C7A', media:'#FFB86B', baja:'#5C8BFF' };
+const HORIZ = ['Este mes','3 meses','Este año','3 años'];
+const MES   = ['ene','feb','mar','abr','may','jun','jul','ago','set','oct','nov','dic'];
+const MESL  = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','setiembre','octubre','noviembre','diciembre'];
+const DIAS  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const ICON = {
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  arrow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+  refresh:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg>'
+};
+
+/* ===== Estado ===== */
+const LS = {
+  get(k){ try{ return localStorage.getItem(k); }catch(_){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(_){} },
+  del(k){ try{ localStorage.removeItem(k); }catch(_){} }
+};
+let CLAVE = LS.get('nucleo_clave') || '';
+let S = null, VISTA = 'inicio', FILTRO = 'todo', BUSCA = '', PLAN_TAB = 'metas', SEMANA_OFF = 0, ABIERTA = null;
+let SH = { modo:'nota', tipo:'auto', meta:'' };
+
+/* ===== Utilidades ===== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const linkify = s => esc(s).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/\n/g,'<br>');
+const pad = n => String(n).padStart(2,'0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parseYmd = s => { const [y,m,d] = String(s).slice(0,10).split('-').map(Number); return new Date(y,m-1,d); };
+function lunes(d = new Date()){ const x = new Date(d); x.setHours(12,0,0,0); x.setDate(x.getDate() - ((x.getDay()+6)%7)); return x; }
+function semanaVista(){ const l = lunes(); l.setDate(l.getDate() + SEMANA_OFF*7); return ymd(l); }
+function rangoSemana(s){ const a = parseYmd(s), b = new Date(a); b.setDate(a.getDate()+6); return `${a.getDate()} ${MES[a.getMonth()]} – ${b.getDate()} ${MES[b.getMonth()]}`; }
+function fechaCorta(s){ const d = parseYmd(s); return isNaN(d) ? '' : `${d.getDate()} ${MES[d.getMonth()]}`; }
+function fechaLarga(){ const d = new Date(); return `${DIAS[d.getDay()]} ${d.getDate()} de ${MESL[d.getMonth()]}`; }
+function hace(iso){
+  const d = new Date(iso); if (isNaN(d)) return '';
+  const m = (Date.now() - d) / 6e4;
+  if (m < 1) return 'ahora';
+  if (m < 60) return `hace ${Math.floor(m)} min`;
+  if (m < 1440) return `hace ${Math.floor(m/60)} h`;
+  if (m < 10080) return `hace ${Math.floor(m/1440)} d`;
+  return `${d.getDate()} ${MES[d.getMonth()]}`;
+}
+const metaNombre = id => (S.metas.find(m => m.id === id) || {}).titulo || '';
+const iaOn = () => LS.get('nucleo_ia') !== '0';
+
+let tTimer;
+function toast(msg, err){ const t = $('#toast'); t.textContent = msg; t.classList.toggle('err', !!err); t.classList.add('on'); clearTimeout(tTimer); tTimer = setTimeout(() => t.classList.remove('on'), 2600); }
+function falla(e){
+  const msg = e && e.message || String(e);
+  if (msg === 'CLAVE') return salir('Tu sesión expiró, vuelve a entrar');
+  toast('⚠️ ' + (msg === 'Failed to fetch' || msg === 'Load failed' ? 'Sin conexión con el servidor' : msg), true);
+}
+
+/* ===== API ===== */
+async function api(accion, datos = {}){
+  const r = await fetch(API_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({ accion, datos, clave: CLAVE }) });
+  const j = await r.json();
+  if (!j.ok) throw new Error(j.error || 'Error');
+  return j.data;
+}
+
+/* ===== Arranque / sesión ===== */
+function pantallaLogin(msg = ''){
+  $('#nav').hidden = true;
+  const sinURL = API_URL.startsWith('PEGA');
+  $('#main').innerHTML = `<div class="login fade">
+    <div class="logo">NÚCLEO</div>
+    <div class="ts">Tu sistema personal · segundo cerebro, plan de vida y revisión</div>
+    ${sinURL
+      ? `<div class="glass empty" style="margin-top:20px">Falta pegar la URL de tu Apps Script en <b>API_URL</b> (arriba del script).</div>`
+      : `<form class="glass loginf" onsubmit="entrar(event)">
+          <input class="in" type="password" id="clave" placeholder="Tu clave" autocomplete="current-password" required>
+          <button class="btn">Entrar</button>
+          ${msg ? `<div class="err">${esc(msg)}</div>` : ''}
+        </form>`}
+  </div>`;
+}
+async function entrar(e){
+  e.preventDefault();
+  const b = e.target.querySelector('button'); b.disabled = true; b.textContent = 'Entrando…';
+  CLAVE = $('#clave').value;
+  try { S = await api('estado'); LS.set('nucleo_clave', CLAVE); $('#nav').hidden = false; render(); }
+  catch (err) { CLAVE = ''; pantallaLogin(err.message === 'CLAVE' ? 'Clave incorrecta' : err.message); }
+}
+function salir(msg = ''){ CLAVE = ''; LS.del('nucleo_clave'); S = null; pantallaLogin(msg); }
+async function cargar(){
+  $('#main').innerHTML = '<div class="loader"><div class="spin"></div></div>';
+  try { S = await api('estado'); $('#nav').hidden = false; render(); }
+  catch (e) {
+    if (e.message === 'CLAVE') return salir('Vuelve a escribir tu clave');
+    $('#main').innerHTML = `<div class="login"><div class="glass empty">No pude conectar con tu backend.<br><br><button class="btn" onclick="cargar()">Reintentar</button></div></div>`;
+  }
+}
+async function refrescar(){ try { S = await api('estado'); render(); toast('Actualizado ✨'); } catch (e) { falla(e); } }
+
+/* ===== Router ===== */
+function render(){
+  document.querySelectorAll('.nav [data-v]').forEach(b => b.classList.toggle('on', b.dataset.v === VISTA));
+  const v = { inicio:vInicio, cerebro:vCerebro, plan:vPlan, revision:vRevision }[VISTA];
+  $('#main').innerHTML = `<div class="fade">${v()}</div>`;
+}
+function ir(v){ VISTA = v; render(); window.scrollTo({ top:0 }); }
+function irPlan(tab){ PLAN_TAB = tab; SEMANA_OFF = 0; ir('plan'); }
+function irCerebro(f){ FILTRO = f; ir('cerebro'); }
+
+/* ===== Piezas ===== */
+function ring(p){
+  const r = 26, c = 2*Math.PI*r;
+  return `<svg width="68" height="68" viewBox="0 0 64 64"><circle cx="32" cy="32" r="${r}" stroke="rgba(255,255,255,.1)" stroke-width="7" fill="none"/>
+  <circle cx="32" cy="32" r="${r}" stroke="url(#gr)" stroke-width="7" fill="none" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-p/100)}" transform="rotate(-90 32 32)"/>
+  <text x="32" y="36.5" text-anchor="middle" font-size="12" font-weight="800" fill="#EEF2FF" font-family="Manrope">${p}%</text></svg>`;
+}
+function ordenarTareas(ts){
+  const pr = { alta:0, media:1, baja:2 };
+  return [...ts].sort((a,b) => (a.estado==='hecha') - (b.estado==='hecha') || (pr[a.prioridad]??1) - (pr[b.prioridad]??1));
+}
+function tareaHTML(t, vieja){
+  const m = metaNombre(t.meta_id), hecha = t.estado === 'hecha';
+  return `<div class="task ${hecha?'done':''}">
+    <button class="check ${hecha?'on':''}" onclick="toggleTarea('${t.id}')" aria-label="Completar">${ICON.check}</button>
+    <div class="tb"><div class="tt">${esc(t.titulo)}</div>${m||vieja ? `<div class="ts">${m?'🎯 '+esc(m):''}${vieja?` · semana del ${fechaCorta(t.semana)}`:''}</div>` : ''}</div>
+    ${vieja ? `<button class="mini" onclick="traer('${t.id}')">→ Esta semana</button>` : `<span class="dot" style="background:${PRIO[t.prioridad]||PRIO.media}"></span>`}
+    <button class="x" onclick="borrarTarea('${t.id}')" aria-label="Borrar">${ICON.x}</button>
+  </div>`;
+}
+function opcionesMetas(sel = ''){
+  return `<option value="">Sin meta</option>` + S.metas.filter(m => m.estado === 'activa')
+    .map(m => `<option value="${m.id}" ${m.id===sel?'selected':''}>${esc(m.titulo)}</option>`).join('');
+}
+function progresoTareas(id){ const ts = S.tareas.filter(t => t.meta_id === id); return { total: ts.length, hechas: ts.filter(t => t.estado === 'hecha').length }; }
+
+/* ===== Vista: Inicio ===== */
+function vInicio(){
+  const sem = ymd(lunes());
+  const ts = S.tareas.filter(t => t.semana === sem);
+  const hechas = ts.filter(t => t.estado === 'hecha').length;
+  const pct = ts.length ? Math.round(hechas/ts.length*100) : 0;
+  const metas = S.metas.filter(m => m.estado === 'activa');
+  const inbox = S.notas.filter(n => n.estado === 'inbox').length;
+  const rev = S.revisiones[0];
+  const h = new Date().getHours();
+  const saludo = h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches';
+  return `
+  <header class="top"><div><div class="kicker">${fechaLarga()}</div><h1 class="title">${saludo},<br><span class="grad">${esc(NOMBRE)}</span></h1></div>
+    <button class="icon-btn" onclick="refrescar()" aria-label="Actualizar">${ICON.refresh}</button></header>
+  <form class="quick glass" onsubmit="rapida(event)">
+    <input class="in bare" id="qIn" placeholder="¿Qué tienes en la cabeza?" autocomplete="off">
+    <button class="send" aria-label="Guardar">${ICON.arrow}</button>
+  </form>
+  <div class="stats sec">
+    <div class="stat glass big">${ring(pct)}<div><div class="n">${hechas}<span class="of">/${ts.length}</span></div><div class="l">Tareas de esta semana</div></div></div>
+    <button class="stat glass" onclick="irPlan('metas')"><div class="n">${metas.length}</div><div class="l">Metas activas</div></button>
+    <button class="stat glass" onclick="irCerebro('inbox')"><div class="n">${inbox}</div><div class="l">Notas sin ordenar</div></button>
+  </div>
+  <section class="sec"><div class="glass foco"><div class="kicker">🎯 Foco de la semana</div>
+    ${rev && rev.prioridades.length
+      ? `<ol>${rev.prioridades.map(p => `<li>${esc(p)}</li>`).join('')}</ol><div class="ts" style="margin-top:10px">De tu revisión ${hace(rev.creado)}</div>`
+      : `<p>Genera tu primera revisión y aquí verás tus 3 prioridades.</p><button class="btn ghost sm" onclick="ir('revision')">Ir a revisión</button>`}
+  </div></section>
+  <section class="sec"><div class="sec-h"><h2>Esta semana</h2><button class="link" onclick="irPlan('semana')">Ver plan →</button></div>
+    <div class="glass list">${ts.length ? ordenarTareas(ts).slice(0,6).map(t => tareaHTML(t)).join('') : `<div class="empty">Sin tareas esta semana.<br>Toca <b>+</b> para agregar una.</div>`}</div></section>
+  <section class="sec"><div class="sec-h"><h2>Metas</h2><button class="link" onclick="irPlan('metas')">Todas →</button></div>
+    ${metas.length ? metas.slice(0,3).map(m => `<div class="glass meta" style="padding:16px" onclick="ABIERTA='${m.id}';irPlan('metas')">
+      <div class="mt"><b>${esc(m.titulo)}</b><span class="pct">${Number(m.progreso)||0}%</span></div>
+      <div class="bar"><i style="width:${Number(m.progreso)||0}%"></i></div></div>`).join('')
+    : `<div class="glass empty">Aún no tienes metas.<br><button class="btn sm" style="margin-top:12px" onclick="abrirCaptura('meta')">Crear mi primera meta</button></div>`}
+  </section>
+  <div style="text-align:center;margin-top:30px"><button class="link" style="color:var(--mut)" onclick="salir()">Cerrar sesión</button></div>`;
+}
+
+/* ===== Vista: Cerebro ===== */
+function notasFiltradas(){
+  const q = BUSCA.toLowerCase().trim();
+  let ns = S.notas.filter(n => FILTRO === 'todo' || (FILTRO === 'inbox' ? n.estado === 'inbox' : n.tipo === FILTRO));
+  if (q) ns = ns.filter(n => `${n.contenido} ${n.etiquetas} ${n.area} ${metaNombre(n.meta_id)}`.toLowerCase().includes(q));
+  return ns;
+}
+function notaHTML(n){
+  const [tl, col] = TIPOS[n.tipo] || TIPOS.nota;
+  const m = metaNombre(n.meta_id);
+  const tags = String(n.etiquetas || '').split(',').map(s => s.trim()).filter(Boolean);
+  return `<article class="glass note">
+    <div class="nh"><span class="badge" style="color:${col};background:${col}1f">${tl}</span>
+      ${n.area ? `<span class="area">${esc(n.area)}</span>` : ''}
+      ${n.estado === 'inbox' ? '<span class="area warn">Sin ordenar</span>' : ''}
+      <span class="when">${hace(n.creado)}</span></div>
+    <div class="nc">${linkify(n.contenido)}</div>
+    ${tags.length || m ? `<div class="nt">${m ? `<span class="mlink">🎯 ${esc(m)}</span>` : ''}${tags.map(t => `<span>#${esc(t)}</span>`).join('')}</div>` : ''}
+    <div class="na">
+      ${n.estado === 'inbox' ? `<button onclick="ordenarIA('${n.id}',this)">✨ Ordenar con IA</button>` : ''}
+      <button onclick="aTarea('${n.id}',this)">→ Tarea</button>
+      <button onclick="archivar('${n.id}')">Archivar</button>
+      <button class="del" onclick="borrarNota('${n.id}')">Borrar</button>
+    </div></article>`;
+}
+function listaNotasHTML(){
+  const ns = notasFiltradas();
+  return ns.length ? ns.map(notaHTML).join('') : `<div class="glass empty">${S.notas.length ? 'Nada por aquí con ese filtro.' : 'Tu cerebro está vacío.<br>Captura tu primera idea con <b>+</b>.'}</div>`;
+}
+function vCerebro(){
+  const chips = [['todo','Todo'],['inbox','Sin ordenar'], ...Object.entries(TIPOS).map(([k,v]) => [k, v[0]])];
+  return `<header class="top"><div><div class="kicker">Segundo cerebro</div><h1 class="title">Todo lo que<br><span class="grad">no quieres olvidar</span></h1></div></header>
+  <input class="in sec" placeholder="Buscar ideas, links, etiquetas…" value="${esc(BUSCA)}" oninput="buscar(this.value)">
+  <div class="chips" style="margin-top:12px">${chips.map(([k,l]) => `<button class="chip ${FILTRO===k?'on':''}" onclick="filtrar('${k}')">${l}</button>`).join('')}</div>
+  <div id="notas" class="sec">${listaNotasHTML()}</div>`;
+}
+function buscar(v){ BUSCA = v; $('#notas').innerHTML = listaNotasHTML(); }
+function filtrar(k){ FILTRO = k; render(); }
+
+/* ===== Vista: Plan ===== */
+function vPlan(){
+  return `<header class="top"><div><div class="kicker">Plan de vida</div><h1 class="title">Hacia dónde<br><span class="grad">vas</span></h1></div></header>
+  <div class="seg sec"><button class="${PLAN_TAB==='metas'?'on':''}" onclick="PLAN_TAB='metas';render()">🎯 Metas</button><button class="${PLAN_TAB==='semana'?'on':''}" onclick="PLAN_TAB='semana';render()">📅 Semana</button></div>
+  ${PLAN_TAB === 'metas' ? vMetas() : vSemana()}`;
+}
+function vMetas(){
+  const orden = { activa:0, pausada:1, lograda:2 };
+  const ms = S.metas.filter(m => m.estado !== 'archivada').sort((a,b) => (orden[a.estado]??3) - (orden[b.estado]??3));
+  const areas = [...new Set(ms.map(m => m.area || 'Personal'))];
+  return `<button class="btn full" onclick="abrirCaptura('meta')">+ Nueva meta</button>
+  ${ms.length ? areas.map(a => `<div class="area-h">${esc(a)}</div>${ms.filter(m => (m.area||'Personal') === a).map(metaCard).join('')}`).join('')
+    : `<div class="glass empty sec">Define 3 a 5 metas grandes. Todo lo demás (tareas, notas, revisiones) se conecta a ellas.</div>`}`;
+}
+function metaCard(m){
+  const p = Number(m.progreso) || 0, pt = progresoTareas(m.id);
+  const etiqueta = { activa:'', pausada:' · Pausada', lograda:' · ✅ Lograda' }[m.estado] || '';
+  return `<details class="glass meta ${m.estado}" ${ABIERTA===m.id?'open':''} ontoggle="if(this.open)ABIERTA='${m.id}';else if(ABIERTA==='${m.id}')ABIERTA=null">
+    <summary><div class="mt"><b>${esc(m.titulo)}</b><span class="pct">${p}%</span></div>
+      <div class="bar"><i style="width:${p}%"></i></div>
+      <div class="ts" style="margin-top:10px">${esc(m.horizonte)}${m.fecha_limite ? ' · hasta ' + fechaCorta(m.fecha_limite) : ''} · ${pt.hechas}/${pt.total} tareas${etiqueta}</div>
+    </summary>
+    <div class="mbody">
+      ${m.por_que ? `<div class="why"><span class="tag">Por qué</span>${esc(m.por_que)}</div>` : ''}
+      <div class="range"><input type="range" min="0" max="100" step="5" value="${p}" oninput="this.nextElementSibling.textContent=this.value+'%'" onchange="setProgreso('${m.id}',this.value)"><b>${p}%</b></div>
+      <div class="acts">
+        <button class="btn sm" onclick="abrirCaptura('tarea','${m.id}')">+ Tarea</button>
+        ${m.estado === 'activa'
+          ? `<button class="btn ghost sm" onclick="estadoMeta('${m.id}','pausada')">Pausar</button><button class="btn ghost sm" onclick="estadoMeta('${m.id}','lograda')">✅ Lograda</button>`
+          : `<button class="btn ghost sm" onclick="estadoMeta('${m.id}','activa')">Reactivar</button>`}
+        <button class="btn ghost sm" style="color:var(--red)" onclick="borrarMeta('${m.id}')">Borrar</button>
+      </div>
+    </div></details>`;
+}
+function vSemana(){
+  const sem = semanaVista(), actual = SEMANA_OFF === 0;
+  const ts = S.tareas.filter(t => t.semana === sem);
+  const h = ts.filter(t => t.estado === 'hecha').length;
+  const atras = actual ? S.tareas.filter(t => t.estado !== 'hecha' && t.semana < sem) : [];
+  const nombre = actual ? 'Esta semana' : SEMANA_OFF === 1 ? 'Próxima semana' : SEMANA_OFF === -1 ? 'Semana pasada' : 'Semana';
+  return `<div class="weeknav sec"><button class="btn ghost sm" onclick="SEMANA_OFF--;render()">‹</button>
+    <div><div class="kicker">${nombre}</div><div class="wk">${rangoSemana(sem)}</div></div>
+    <button class="btn ghost sm" onclick="SEMANA_OFF++;render()">›</button></div>
+  <div class="bar" style="margin:16px 0 6px"><i style="width:${ts.length ? h/ts.length*100 : 0}%"></i></div>
+  <div class="ts">${h} de ${ts.length} completadas</div>
+  <form class="addtask glass sec" onsubmit="nuevaTarea(event,'${sem}')">
+    <input class="in bare" name="titulo" placeholder="Nueva tarea…" autocomplete="off" required>
+    <div class="row"><select class="in sm" name="meta_id">${opcionesMetas()}</select>
+      <select class="in sm" name="prioridad" style="flex:0 0 96px"><option value="alta">Alta</option><option value="media" selected>Media</option><option value="baja">Baja</option></select>
+      <button class="btn sm">+</button></div>
+  </form>
+  <div class="glass list sec">${ts.length ? ordenarTareas(ts).map(t => tareaHTML(t)).join('') : '<div class="empty">Nada planeado para esta semana.</div>'}</div>
+  ${atras.length ? `<section class="sec"><div class="sec-h"><h2>Pendientes de antes</h2><button class="link" onclick="traerTodas()">Traer todas →</button></div>
+    <div class="glass list">${atras.map(t => tareaHTML(t, true)).join('')}</div></section>` : ''}`;
+}
+
+/* ===== Vista: Revisión ===== */
+function vRevision(){
+  const [r, ...hist] = S.revisiones;
+  return `<header class="top"><div><div class="kicker">Agente de revisión</div><h1 class="title">¿Cómo te<br><span class="grad">fue?</span></h1></div></header>
+  <div class="glass gen sec"><p>Analiza tus tareas, metas y notas de los últimos 7 días. Cada domingo a las 7 pm te llega sola por correo.</p>
+    <button class="btn" id="genBtn" onclick="generar()" ${S.ia.restante <= 0 ? 'disabled' : ''}>✨ Revisar mi semana ahora</button>
+    <div class="ts">IA disponible hoy: ${S.ia.restante}/${S.ia.limite}</div></div>
+  ${r ? revHTML(r, true) : '<div class="glass empty sec">Aún no hay revisiones. Genera la primera arriba.</div>'}
+  ${hist.length ? `<section class="sec"><div class="sec-h"><h2>Anteriores</h2></div>
+    ${hist.map(x => `<details class="glass hist"><summary>Semana del ${fechaCorta(x.semana)}</summary>${revHTML(x, false)}</details>`).join('')}</section>` : ''}`;
+}
+function revHTML(r, card){
+  const L = (t, a, cls) => a && a.length ? `<h3>${t}</h3><ul class="${cls||''}">${a.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '';
+  const inner = `<p class="res">${esc(r.resumen)}</p>${L('✅ Logros', r.logros)}${L('⚠️ Atascado', r.atascado)}${L('🎯 Prioridades', r.prioridades, 'prio')}
+    ${r.pregunta ? `<div class="q"><b>Para pensar</b>${esc(r.pregunta)}</div>` : ''}`;
+  return card ? `<article class="glass rev sec"><div class="kicker">Semana del ${fechaCorta(r.semana)} · ${hace(r.creado)}</div>${inner}</article>` : `<div class="rev">${inner}</div>`;
+}
+
+/* ===== Acciones: notas ===== */
+async function rapida(e){
+  e.preventDefault();
+  const i = $('#qIn'), v = i.value.trim();
+  if (!v) return;
+  i.value = '';
+  await crearNota(v, 'auto', iaOn());
+}
+async function crearNota(contenido, tipo, ia){
+  ia = ia && S.ia.restante > 0;
+  toast(ia ? 'Guardando y ordenando… ✨' : 'Guardando…');
+  try {
+    const r = await api('guardarNota', { contenido, tipo: tipo === 'auto' ? '' : tipo, ia });
+    S.notas.unshift(r.nota);
+    if (ia && !r.aviso) S.ia.restante = Math.max(0, S.ia.restante - 1);
+    toast(r.aviso ? '⚠️ ' + r.aviso : 'Guardado en tu cerebro 🧠', !!r.aviso);
+    render();
+  } catch (e) { falla(e); }
+}
+async function ordenarIA(id, btn){
+  btn.disabled = true; btn.textContent = 'Ordenando…';
+  try {
+    const n = await api('clasificarNota', { id });
+    S.notas = S.notas.map(x => x.id === id ? n : x);
+    S.ia.restante = Math.max(0, S.ia.restante - 1);
+    render(); toast('Ordenada ✨');
+  } catch (e) { btn.disabled = false; btn.textContent = '✨ Ordenar con IA'; falla(e); }
+}
+async function aTarea(id, btn){
+  btn.disabled = true;
+  try {
+    const r = await api('notaATarea', { id });
+    S.tareas.push(r.tarea);
+    S.notas = S.notas.filter(n => n.id !== id);
+    render(); toast('Ahora es una tarea de esta semana ✅');
+  } catch (e) { btn.disabled = false; falla(e); }
+}
+async function archivar(id){
+  const prev = S.notas;
+  S.notas = S.notas.filter(n => n.id !== id); render();
+  try { await api('actualizarNota', { id, estado:'archivada' }); toast('Archivada'); } catch (e) { S.notas = prev; render(); falla(e); }
+}
+async function borrarNota(id){
+  if (!confirm('¿Borrar esta nota para siempre?')) return;
+  const prev = S.notas;
+  S.notas = S.notas.filter(n => n.id !== id); render();
+  try { await api('borrarNota', { id }); } catch (e) { S.notas = prev; render(); falla(e); }
+}
+
+/* ===== Acciones: tareas ===== */
+async function toggleTarea(id){
+  const t = S.tareas.find(x => x.id === id); if (!t) return;
+  const prev = t.estado;
+  t.estado = prev === 'hecha' ? 'pendiente' : 'hecha';
+  t.completado = t.estado === 'hecha' ? new Date().toISOString() : '';
+  render();
+  if (t.estado === 'hecha' && navigator.vibrate) navigator.vibrate(12);
+  try { await api('actualizarTarea', { id, estado: t.estado }); } catch (e) { t.estado = prev; render(); falla(e); }
+}
+async function borrarTarea(id){
+  if (!confirm('¿Borrar esta tarea?')) return;
+  const prev = S.tareas;
+  S.tareas = S.tareas.filter(t => t.id !== id); render();
+  try { await api('borrarTarea', { id }); } catch (e) { S.tareas = prev; render(); falla(e); }
+}
+async function nuevaTarea(e, semana){
+  e.preventDefault();
+  const f = new FormData(e.target), btn = e.target.querySelector('button');
+  btn.disabled = true;
+  try {
+    const t = await api('guardarTarea', { titulo: f.get('titulo'), meta_id: f.get('meta_id'), prioridad: f.get('prioridad'), semana });
+    S.tareas.push(t); render();
+    const inp = document.querySelector('.addtask input'); inp && inp.focus();
+  } catch (err) { btn.disabled = false; falla(err); }
+}
+async function traer(id){
+  const t = S.tareas.find(x => x.id === id), sem = ymd(lunes()), prev = t.semana;
+  t.semana = sem; render();
+  try { await api('actualizarTarea', { id, semana: sem }); } catch (e) { t.semana = prev; render(); falla(e); }
+}
+async function traerTodas(){
+  const sem = ymd(lunes());
+  const viejas = S.tareas.filter(t => t.estado !== 'hecha' && t.semana < sem);
+  viejas.forEach(t => t.semana = sem); render();
+  try { for (const t of viejas) await api('actualizarTarea', { id: t.id, semana: sem }); toast(`${viejas.length} tareas movidas a esta semana`); }
+  catch (e) { falla(e); refrescar(); }
+}
+
+/* ===== Acciones: metas ===== */
+async function setProgreso(id, v){
+  const m = S.metas.find(x => x.id === id); m.progreso = String(v); ABIERTA = id; render();
+  try { await api('actualizarMeta', { id, progreso: String(v) }); } catch (e) { falla(e); }
+}
+async function estadoMeta(id, estado){
+  const m = S.metas.find(x => x.id === id), prev = m.estado;
+  m.estado = estado; if (estado === 'lograda') m.progreso = '100';
+  render();
+  if (estado === 'lograda') toast('¡Meta lograda! 🏆');
+  try { await api('actualizarMeta', { id, estado, progreso: m.progreso }); } catch (e) { m.estado = prev; render(); falla(e); }
+}
+async function borrarMeta(id){
+  if (!confirm('¿Borrar esta meta? Sus tareas se quedan, pero sin meta.')) return;
+  const prev = S.metas;
+  S.metas = S.metas.filter(m => m.id !== id); render();
+  try { await api('borrarMeta', { id }); } catch (e) { S.metas = prev; render(); falla(e); }
+}
+
+/* ===== Revisión ===== */
+async function generar(){
+  const b = $('#genBtn'); b.disabled = true; b.textContent = 'Analizando tu semana…';
+  try {
+    const r = await api('revisarAhora');
+    S.revisiones.unshift(r);
+    S.ia.restante = Math.max(0, S.ia.restante - 1);
+    render(); toast('Revisión lista ✨');
+  } catch (e) { b.disabled = false; b.textContent = '✨ Revisar mi semana ahora'; falla(e); }
+}
+
+/* ===== Sheet de captura ===== */
+function abrirCaptura(modo = 'nota', meta = ''){
+  SH = { modo, tipo:'auto', meta };
+  pintarSheet();
+  $('#ov').classList.add('on'); $('#sheet').classList.add('on');
+  setTimeout(() => { const f = $('#sheet textarea, #sheet input[name=titulo]'); f && f.focus(); }, 340);
+}
+function cerrarSheet(){ $('#ov').classList.remove('on'); $('#sheet').classList.remove('on'); }
+function modoSheet(m){ SH.modo = m; pintarSheet(); const f = $('#sheet textarea, #sheet input[name=titulo]'); f && f.focus(); }
+function pintarSheet(){
+  const seg = `<div class="grab"></div><div class="seg">
+    <button class="${SH.modo==='nota'?'on':''}" onclick="modoSheet('nota')">💭 Nota</button>
+    <button class="${SH.modo==='tarea'?'on':''}" onclick="modoSheet('tarea')">✅ Tarea</button>
+    <button class="${SH.modo==='meta'?'on':''}" onclick="modoSheet('meta')">🎯 Meta</button></div>`;
+  const forms = {
+    nota: `<form onsubmit="enviarNota(event)">
+      <textarea class="in sec" name="contenido" placeholder="Una idea, un link, algo que aprendiste, una referencia…" required onkeydown="if((event.metaKey||event.ctrlKey)&&event.key==='Enter')this.form.requestSubmit()"></textarea>
+      <div class="chips">${[['auto','✨ Auto'], ...Object.entries(TIPOS).map(([k,v]) => [k, v[0]])].map(([k,l]) =>
+        `<button type="button" class="chip ${SH.tipo===k?'on':''}" onclick="SH.tipo='${k}';this.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));this.classList.add('on')">${l}</button>`).join('')}</div>
+      <label class="sw"><input type="checkbox" name="ia" ${iaOn()?'checked':''} onchange="LS.set('nucleo_ia',this.checked?'1':'0')"><span></span>Ordenar con IA <small>(${S.ia.restante} disponibles hoy)</small></label>
+      <button class="btn full">Guardar en mi cerebro</button></form>`,
+    tarea: `<form onsubmit="enviarTarea(event)">
+      <label class="f">Tarea</label><input class="in" name="titulo" placeholder="¿Qué tienes que hacer?" required autocomplete="off">
+      <label class="f">Meta</label><select class="in" name="meta_id">${opcionesMetas(SH.meta)}</select>
+      <div class="two"><div><label class="f">Prioridad</label><select class="in" name="prioridad"><option value="alta">Alta</option><option value="media" selected>Media</option><option value="baja">Baja</option></select></div>
+      <div><label class="f">Cuándo</label><select class="in" name="cuando"><option value="0">Esta semana</option><option value="1">Próxima semana</option></select></div></div>
+      <button class="btn full">Agregar tarea</button></form>`,
+    meta: `<form onsubmit="enviarMeta(event)">
+      <label class="f">Meta</label><input class="in" name="titulo" placeholder="Ej: Independizarme antes de julio" required autocomplete="off">
+      <div class="two"><div><label class="f">Área</label><select class="in" name="area">${S.areas.map(a => `<option>${a}</option>`).join('')}</select></div>
+      <div><label class="f">Horizonte</label><select class="in" name="horizonte">${HORIZ.map(x => `<option ${x==='Este año'?'selected':''}>${x}</option>`).join('')}</select></div></div>
+      <label class="f">Fecha límite (opcional)</label><input class="in" type="date" name="fecha_limite">
+      <label class="f">¿Por qué te importa?</label><textarea class="in" name="por_que" style="min-height:90px" placeholder="Esto lo usa el agente para motivarte con tu propia razón"></textarea>
+      <button class="btn full">Crear meta</button></form>`
+  };
+  $('#sheet').innerHTML = seg + forms[SH.modo];
+}
+async function enviarNota(e){
+  e.preventDefault();
+  const f = new FormData(e.target);
+  cerrarSheet();
+  await crearNota(String(f.get('contenido')).trim(), SH.tipo, !!f.get('ia'));
+}
+async function enviarTarea(e){
+  e.preventDefault();
+  const f = new FormData(e.target), btn = e.target.querySelector('.btn');
+  const l = lunes(); l.setDate(l.getDate() + Number(f.get('cuando')) * 7);
+  btn.disabled = true;
+  try {
+    const t = await api('guardarTarea', { titulo: f.get('titulo'), meta_id: f.get('meta_id'), prioridad: f.get('prioridad'), semana: ymd(l) });
+    S.tareas.push(t); cerrarSheet(); render(); toast('Tarea agregada ✅');
+  } catch (err) { btn.disabled = false; falla(err); }
+}
+async function enviarMeta(e){
+  e.preventDefault();
+  const f = new FormData(e.target), btn = e.target.querySelector('.btn');
+  btn.disabled = true;
+  try {
+    const m = await api('guardarMeta', Object.fromEntries(f.entries()));
+    S.metas.push(m); ABIERTA = m.id; cerrarSheet(); irPlan('metas'); toast('Meta creada 🎯');
+  } catch (err) { btn.disabled = false; falla(err); }
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarSheet(); });
+
+/* ===== Inicio ===== */
+if (CLAVE && !API_URL.startsWith('PEGA')) cargar(); else pantallaLogin();
+</script>
+</body>
+</html>
